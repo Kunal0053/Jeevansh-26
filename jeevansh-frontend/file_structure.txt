@@ -1,0 +1,40 @@
+jeevansh-frontend/
+├── index.html
+├── package.json
+├── vite.config.js
+├── .env
+└── src/
+    ├── main.jsx
+    ├── App.jsx
+    ├── index.css
+    ├── context/
+    │   ├── AuthContext.jsx
+    │   └── RequestContext.jsx
+    ├── services/
+    │   ├── mockData.js
+    │   ├── requestService.js
+    │   ├── donorService.js
+    │   └── bankService.js
+    ├── components/
+    │   ├── common/
+    │   │   ├── Button.jsx
+    │   │   ├── Input.jsx
+    │   │   ├── Card.jsx
+    │   │   └── StatusBadge.jsx
+    │   └── layout/
+    │       ├── RequesterLayout.jsx
+    │       ├── DonorLayout.jsx
+    │       └── BankLayout.jsx
+    ├── pages/
+    │   ├── Home.jsx
+    │   ├── RequestForm.jsx
+    │   ├── AlertingScreen.jsx
+    │   ├── StatusScreen.jsx
+    │   ├── DonorRegister.jsx
+    │   ├── DonorLogin.jsx
+    │   ├── DonorDashboard.jsx
+    │   ├── BankLogin.jsx
+    │   ├── BankDashboard.jsx
+    │   └── BankScan.jsx
+    └── utils/
+        └── bloodCompat.js

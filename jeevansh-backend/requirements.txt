@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+motor
+pymongo
+python-dotenv
+pydantic
+httpx
+PyJWT
+qrcode[pil]

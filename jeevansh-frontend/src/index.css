@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  /* Dusty Rose Palette */
+  --color-blood-50: #FDF8F8;
+  --color-blood-100: #F8D7DA;
+  --color-blood-200: #f1b5b9;
+  --color-blood-500: #c97370;
+  --color-blood-600: #B85C58; /* Primary Dusty Rose */
+  --color-blood-700: #9c4744;
+  --color-blood-800: #7a3330;
+  --color-blood-900: #2F3E36; /* Using Dark Green for the darkest text */
+
+  /* Olive Green Palette */
+  --color-olive-50: #F4F7F5;
+  --color-olive-100: #DCE5DE;
+  --color-olive-500: #85a68a;
+  --color-olive-600: #6B8F71; /* Secondary Olive Green */
+  --color-olive-700: #537256;
+
+  /* Off-White / Cream Backgrounds */
+  --color-cream-50: #F9F6F1;
+  --color-cream-100: #f0ebe1;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--color-cream-50);
+  color: var(--color-blood-900);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Animations (Keep these the same) ─── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up { animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+.animate-delay-100 { animation-delay: 0.1s; }
+.animate-delay-200 { animation-delay: 0.2s; }
+.animate-delay-300 { animation-delay: 0.3s; }
+.animate-delay-400 { animation-delay: 0.4s; }
+.animate-delay-500 { animation-delay: 0.5s; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.animate-fade-in { animation: fadeIn 1s ease-out forwards; opacity: 0; }
+
+@keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
+.animate-float { animation: float 4s ease-in-out infinite; }
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(184, 92, 88, 0.4), 0 10px 25px -5px rgba(184, 92, 88, 0.3); }
+  50% { box-shadow: 0 0 0 12px rgba(184, 92, 88, 0), 0 10px 25px -5px rgba(184, 92, 88, 0.5); }
+}
+.animate-pulse-glow { animation: pulseGlow 2.5s ease-in-out infinite; }
+
+@keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+.animate-gradient { background-size: 200% 200%; animation: gradientShift 8s ease infinite; }
+
+/* Reveal on scroll */
+.reveal-base { transition-property: opacity, transform; transition-duration: 800ms; transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1); will-change: opacity, transform; }
+.reveal-hidden-up    { opacity: 0; transform: translateY(40px); }
+.reveal-hidden-down  { opacity: 0; transform: translateY(-40px); }
+.reveal-hidden-left  { opacity: 0; transform: translateX(-40px); }
+.reveal-hidden-right { opacity: 0; transform: translateX(40px); }
+.reveal-hidden-zoom  { opacity: 0; transform: scale(0.92); }
+.reveal-visible      { opacity: 1; transform: none; }
+
+/* Nav underline */
+.nav-underline { position: relative; }
+.nav-underline::after { content: ''; position: absolute; bottom: -2px; left: 0; height: 2px; width: 0; background: var(--color-blood-600); transition: width 0.3s ease; border-radius: 2px; }
+.nav-underline:hover::after, .nav-underline.active::after { width: 100%; }
+
+.hover-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.hover-lift:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -10px rgba(47, 62, 54, 0.1); }
+
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background-color: #e5e7eb; border-radius: 10px; }

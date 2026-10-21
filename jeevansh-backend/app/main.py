@@ -39,7 +39,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     # Configure explicit frontend origins in production.
-    allow_origins=[origin.strip() for origin in __import__("os").getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if origin.strip()],
+    allow_origins=[origin.strip() for origin in __import__("os").getenv("CORS_ORIGINS", "https://jeevansh.netlify.app/").split(",") if origin.strip()],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "X-Requested-With"],

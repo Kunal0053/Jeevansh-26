@@ -18,7 +18,7 @@ WHATSAPP_VERIFY_TOKEN = os.getenv("WHATSAPP_VERIFY_TOKEN", "")
 WHATSAPP_APP_SECRET = os.getenv("WHATSAPP_APP_SECRET", "")
 WHATSAPP_ALERT_TEMPLATE_NAME = os.getenv("WHATSAPP_ALERT_TEMPLATE_NAME", "jeevansh_blood_request")
 WHATSAPP_TEMPLATE_LANGUAGE = os.getenv("WHATSAPP_TEMPLATE_LANGUAGE", "en_US")
-PUBLIC_FRONTEND_URL = os.getenv("PUBLIC_FRONTEND_URL", "http://localhost:5173").rstrip("/")
+PUBLIC_FRONTEND_URL = os.getenv("PUBLIC_FRONTEND_URL", "https://jeevansh.netlify.app/").rstrip("/")
 
 # Workflow controls. Values can be changed in the deployment environment.
 TARGET_SHORTLIST_SIZE = int(os.getenv("TARGET_SHORTLIST_SIZE", "3"))

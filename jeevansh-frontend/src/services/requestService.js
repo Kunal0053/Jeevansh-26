@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const API_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+  import.meta.env.VITE_API_URL || 'https://jeevansh-backend.onrender.com/api'
 
 // Check nearby blood banks.
 // NOTE: This function currently uses mock data.

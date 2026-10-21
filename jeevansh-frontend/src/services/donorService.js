@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://jeevansh-backend.onrender.com/api'
 const DONOR_TOKEN_KEY = 'jeevansh_donor_token';
 
 export function getDonorToken() {

@@ -110,7 +110,7 @@ async def decide_request(request_id: str, payload: BankReviewDecision, bank=Depe
             raise HTTPException(status_code=404, detail="Donor record not found")
 
         token = generate_donation_token(donor_id=donor_id, request_id=request_id, donor_name=donor.get("name", "Donor"))
-        frontend_url = __import__("os").getenv("PUBLIC_FRONTEND_URL", "http://localhost:3000").rstrip("/")
+        frontend_url = __import__("os").getenv("PUBLIC_FRONTEND_URL", "https://jeevansh.netlify.app/").rstrip("/")
         verify_url = f"{frontend_url}/verify/{token}"
         qr_base64 = generate_qr_image_base64(verify_url)
         accepted_donor = {

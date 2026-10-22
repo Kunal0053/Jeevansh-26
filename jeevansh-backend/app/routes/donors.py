@@ -211,12 +211,20 @@ async def get_donor_certificates(donor: dict = Depends(get_current_donor)):
     cursor = db.donations.find({"donor_id": str(donor["_id"])}).sort("verified_at", -1)
     certs = []
     async for doc in cursor:
+        request_doc = None
+        request_id = doc.get("request_id")
+        if request_id:
+            try:
+                request_doc = await db.requests.find_one({"_id": ObjectId(request_id)})
+            except Exception:
+                request_doc = None
         certs.append({
             "id": str(doc["_id"]),
             "donor_name": doc.get("donor_name"),
             "blood_type": doc.get("blood_type"),
-            "request_id": doc.get("request_id"),
-            "verified_at": doc.get("verified_at"),
+            "request_id": request_id,
+            "verified_at": doc.get("verified_at") or doc.get("completed_at") or doc.get("created_at"),
+            "hospital_name": (request_doc or {}).get("hospital_name") or (request_doc or {}).get("location_text"),
         })
     return {"count": len(certs), "certificates": certs}
 
@@ -231,11 +239,19 @@ async def get_single_certificate(cert_id: str, donor: dict = Depends(get_current
     doc = await db.donations.find_one({"_id": oid, "donor_id": str(donor["_id"])})
     if not doc:
         raise HTTPException(status_code=404, detail="Certificate not found")
+    request_doc = None
+    request_id = doc.get("request_id")
+    if request_id:
+        try:
+            request_doc = await db.requests.find_one({"_id": ObjectId(request_id)})
+        except Exception:
+            request_doc = None
     return {
         "id": str(doc["_id"]),
         "donor_name": doc.get("donor_name"),
         "blood_type": doc.get("blood_type"),
-        "request_id": doc.get("request_id"),
-        "verified_at": doc.get("verified_at"),
-        "bank_id": doc.get("bank_id", "Partner Blood Bank"),
+        "request_id": request_id,
+        "verified_at": doc.get("verified_at") or doc.get("completed_at") or doc.get("created_at"),
+        "hospital_name": (request_doc or {}).get("hospital_name") or (request_doc or {}).get("location_text"),
+        "bank_id": doc.get("bank_id"),
     }

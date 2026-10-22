@@ -22,6 +22,9 @@ from app.services.qr_service import generate_donation_token, generate_qr_image_b
 
 logger = logging.getLogger(__name__)
 
+# The product requirement is to shortlist at most the three nearest qualified donors.
+MAX_SHORTLIST_SIZE = 3
+
 SCREENING_QUESTIONS = [
     "Can you currently travel to the hospital listed in the request? Reply YES or NO.",
     "Is your donor availability information still accurate, and are you willing to be assessed by the blood bank? Reply YES or NO.",
@@ -58,7 +61,7 @@ async def start_progressive_search(request_id: str):
         {"$set": {
             "status": "matching",
             "workflow": {
-                "target_shortlist_size": TARGET_SHORTLIST_SIZE,
+                "target_shortlist_size": MAX_SHORTLIST_SIZE,
                 "current_batch_index": -1,
                 "radius_bands_km": RADIUS_BANDS_KM,
                 "next_action_at": datetime.utcnow(),
@@ -88,7 +91,7 @@ async def _qualified_donors(request_id: str) -> list[dict]:
     return result
 
 
-async def _publish_shortlist(request_id: str, qualified: list[dict], limit: int = TARGET_SHORTLIST_SIZE) -> bool:
+async def _publish_shortlist(request_id: str, qualified: list[dict], limit: int = MAX_SHORTLIST_SIZE) -> bool:
     """Select up to three nearest eligible donors and notify each one."""
     db = get_db()
     request_oid = ObjectId(request_id)
@@ -97,7 +100,7 @@ async def _publish_shortlist(request_id: str, qualified: list[dict], limit: int 
         return False
     now = datetime.utcnow()
     chosen = []
-    for candidate in qualified[:limit]:
+    for candidate in qualified[:max(0, min(int(limit), MAX_SHORTLIST_SIZE))]:
         donor_id = candidate.get("id")
         if not donor_id:
             continue
@@ -187,7 +190,7 @@ async def _set_ready_if_target_met(request_id: str) -> bool:
         return False
 
     qualified = await _qualified_donors(request_id)
-    target = int(workflow.get("target_shortlist_size", TARGET_SHORTLIST_SIZE))
+    target = MAX_SHORTLIST_SIZE
     if len(qualified) < target:
         return False
     return await _publish_shortlist(request_id, qualified, limit=target)
@@ -209,7 +212,7 @@ async def dispatch_next_batch(request_id: str):
         # still let the blood bank review the one or two available candidates.
         qualified = await _qualified_donors(request_id)
         if qualified:
-            await _publish_shortlist(request_id, qualified)
+            await _publish_shortlist(request_id, qualified, limit=MAX_SHORTLIST_SIZE)
         else:
             await db.requests.update_one(
                 {"_id": request_oid, "status": {"$nin": ["cancelled", "completed", "fulfilled", "expired", "ready_for_review"]}},

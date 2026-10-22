@@ -127,6 +127,46 @@ async def bank_request_decision(request_id: str, payload: BankDecisionRequest, a
     if not result.modified_count:
         raise HTTPException(status_code=409, detail="Request was already reviewed")
     return {"success": True, "decision": "approve", "status": "approved_by_blood_bank", "donor": {"name": accepted_donor["name"], "phone": accepted_donor["phone"], "blood_type": accepted_donor["blood_type"]}, "donation_verify_url": verify_url, "qr_image_base64": generate_qr_image_base64(verify_url)}
+@router.get("/donations/public-qr/{token}")
+async def get_public_donation_qr(token: str):
+    payload = verify_donation_token(token)
+
+    if not payload:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired donation token"
+        )
+
+    donor_id = payload.get("donor_id")
+    request_id = payload.get("request_id")
+
+    try:
+        donor_oid = ObjectId(donor_id)
+        request_oid = ObjectId(request_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid token data")
+
+    db = get_db()
+    donor = await db.donors.find_one({"_id": donor_oid})
+    request = await db.requests.find_one({"_id": request_oid})
+
+    if not donor or not request:
+        raise HTTPException(status_code=404, detail="Donor or request not found")
+
+    if request.get("status") in {
+        "completed", "cancelled", "expired", "rejected",
+        "rejected_by_blood_bank"
+    }:
+        raise HTTPException(status_code=400, detail="Donation request is no longer active")
+
+    return {
+        "success": True,
+        "donor_name": donor.get("name", "Donor"),
+        "qr_image_base64": generate_qr_image_base64(
+            f"{PUBLIC_FRONTEND_URL.rstrip('/')}/verify/{token}"
+        ),
+        "message": "Show this QR to authorized blood-bank staff."
+    }
 
 @router.post("/api/donations/verify", response_model=DonationResponse)
 async def verify_donation(payload: DonationVerifyRequest, authorization: str | None = Header(default=None)):

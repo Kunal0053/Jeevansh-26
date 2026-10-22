@@ -6,7 +6,7 @@ import { HeartIcon, AlertIcon } from '../components/common/Icons';
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
-  'https://jeevansh-backend.onrender.com/api';
+  'https://jeevansh-backend.onrender.com';
 
 export default function VerifyScreen() {
   const { token } = useParams();

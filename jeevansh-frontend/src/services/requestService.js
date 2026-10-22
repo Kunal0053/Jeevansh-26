@@ -1,8 +1,13 @@
 
 import axios from 'axios';
 
-const API_URL =
-  import.meta.env.VITE_API_URL || 'https://jeevansh-backend.onrender.com/api'
+const BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  'https://jeevansh-backend.onrender.com';
+
+const API_URL = BASE_URL.replace(/\/+$/, '').endsWith('/api')
+  ? BASE_URL.replace(/\/+$/, '')
+  : `${BASE_URL.replace(/\/+$/, '')}/api`;
 
 // Check nearby blood banks.
 // NOTE: This function currently uses mock data.

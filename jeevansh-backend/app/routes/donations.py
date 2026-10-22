@@ -127,7 +127,7 @@ async def bank_request_decision(request_id: str, payload: BankDecisionRequest, a
     if not result.modified_count:
         raise HTTPException(status_code=409, detail="Request was already reviewed")
     return {"success": True, "decision": "approve", "status": "approved_by_blood_bank", "donor": {"name": accepted_donor["name"], "phone": accepted_donor["phone"], "blood_type": accepted_donor["blood_type"]}, "donation_verify_url": verify_url, "qr_image_base64": generate_qr_image_base64(verify_url)}
-@router.get("/donations/public-qr/{token}")
+@router.get("/api/donations/public-qr/{token}")
 async def get_public_donation_qr(token: str):
     payload = verify_donation_token(token)
 

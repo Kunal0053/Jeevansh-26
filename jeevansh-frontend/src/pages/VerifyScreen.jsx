@@ -4,9 +4,15 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { HeartIcon, AlertIcon } from '../components/common/Icons';
 
-const API_URL =
+const configuredApiUrl = (
   import.meta.env.VITE_API_URL ||
-  'https://jeevansh-backend.onrender.com';
+  'https://jeevansh-backend.onrender.com/api'
+).replace(/\/+$/, '');
+
+// Keep the frontend API base consistent whether VITE_API_URL includes /api or not.
+const API_URL = configuredApiUrl.endsWith('/api')
+  ? configuredApiUrl
+  : `${configuredApiUrl}/api`;
 
 export default function VerifyScreen() {
   const { token } = useParams();

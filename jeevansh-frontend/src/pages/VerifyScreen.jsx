@@ -1,33 +1,119 @@
+
 import { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { verifyDonation } from '../services/bankService';
-import { HeartIcon, ShieldIcon, CheckCircleIcon, AlertIcon } from '../components/common/Icons';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import { HeartIcon, AlertIcon } from '../components/common/Icons';
+
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  'https://jeevansh-backend.onrender.com/api';
 
 export default function VerifyScreen() {
   const { token } = useParams();
-  const navigate = useNavigate();
-  const { bank } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
+  const [qrImage, setQrImage] = useState('');
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (token) localStorage.setItem('jeevansh_pending_verify_token', token);
+    let cancelled = false;
+
+    async function loadQR() {
+      setLoading(true);
+      setError('');
+      setQrImage('');
+
+      try {
+        const response = await axios.get(
+          `${API_URL}/donations/public-qr/${encodeURIComponent(token)}`
+        );
+
+        if (cancelled) return;
+
+        const image = response.data.qr_image_base64;
+
+        if (!image) {
+          throw new Error('QR image was not returned by the server.');
+        }
+
+        setQrImage(
+          image.startsWith('data:image/')
+            ? image
+            : `data:image/png;base64,${image}`
+        );
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err.response?.data?.detail ||
+            err.message ||
+            'Unable to load QR code. Please try again.'
+          );
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    if (token) {
+      loadQR();
+    } else {
+      setError('Verification link is missing its token.');
+      setLoading(false);
+    }
+
+    return () => {
+      cancelled = true;
+    };
   }, [token]);
 
-  const handleVerify = async () => {
-    setLoading(true); setError('');
-    try {
-      const data = await verifyDonation(token, bank?.id || null);
-      setResult(data);
-      localStorage.removeItem('jeevansh_pending_verify_token');
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Verification failed. The token may be invalid, expired, or already used.');
-    } finally { setLoading(false); }
-  };
+  return (
+    <div className="max-w-xl mx-auto py-12 px-5">
+      <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-7 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-blood-100 flex items-center justify-center mx-auto mb-4">
+          <HeartIcon size={32} className="text-blood-600" />
+        </div>
 
-  if (result) return <div className="max-w-xl mx-auto py-16 px-6"><div className="bg-white rounded-3xl border-2 border-emerald-200 p-8 text-center"><CheckCircleIcon size={56} className="text-emerald-600 mx-auto mb-4" /><h1 className="text-3xl font-black text-emerald-700">Donor Identity Verified</h1><p className="mt-3 text-gray-600">{result.message}</p><p className="mt-4 text-gray-700">Donor: <strong>{result.donor_name}</strong> · Blood group: <strong>{result.blood_type}</strong></p><button onClick={() => navigate('/bank/scan')} className="mt-6 bg-blood-600 text-white font-bold rounded-xl px-5 py-3">Return to verification portal</button></div></div>;
+        <h1 className="text-2xl font-black text-gray-900">
+          Jeevansh Donation Verification
+        </h1>
 
-  return <div className="max-w-xl mx-auto py-16 px-6"><div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 text-center"><div className="w-16 h-16 rounded-2xl bg-blood-100 flex items-center justify-center mx-auto mb-4"><HeartIcon size={32} className="text-blood-600" /></div><h1 className="text-2xl font-black text-gray-900">Jeevansh Donation Verification</h1><p className="text-sm text-gray-600 mt-3">This QR contains a time-limited donation token. Only signed-in blood-bank staff should use this link to verify the selected donor’s identity. Medical screening and final decision are separate steps.</p><div className="mt-5 rounded-xl bg-gray-50 border border-gray-200 p-3 text-left"><p className="text-xs text-gray-500 mb-1">Token preview</p><p className="text-xs font-mono break-all">{token?.slice(0, 48)}…</p></div>{!bank ? <><p className="mt-5 text-sm text-amber-700"><ShieldIcon size={16} className="inline mr-1" />Please sign in as blood-bank staff to continue.</p><Link to="/bank/login" className="inline-block mt-4 bg-blood-600 text-white font-bold rounded-xl px-5 py-3">Blood bank sign in</Link><p className="text-xs text-gray-500 mt-3">After signing in, open the verification scanner and paste/scan this token if it does not resume automatically.</p></> : <button disabled={loading} onClick={handleVerify} className="mt-5 w-full bg-emerald-600 text-white font-black rounded-xl px-5 py-4 disabled:opacity-50">{loading ? 'Verifying…' : 'Verify donor identity'}</button>}{error && <div className="mt-5 bg-red-50 border border-red-100 rounded-xl p-3 text-sm text-red-700"><AlertIcon size={16} className="inline mr-1" />{error}</div>}</div></div>;
+        <p className="text-sm text-gray-600 mt-3">
+          Show this QR code to authorized blood-bank staff
+          when you visit the blood bank.
+        </p>
+
+        {loading && (
+          <div className="py-12 text-gray-500">
+            Loading your QR code...
+          </div>
+        )}
+
+        {!loading && qrImage && (
+          <div className="mt-6 flex flex-col items-center">
+            <div className="p-3 bg-white border border-gray-200 rounded-2xl">
+              <img
+                src={qrImage}
+                alt="Donation verification QR code"
+                className="w-64 h-64 object-contain"
+              />
+            </div>
+
+            <p className="mt-4 text-sm font-semibold text-gray-800">
+              Please show this QR to blood-bank staff.
+            </p>
+
+            <p className="mt-2 text-xs text-gray-500">
+              Identity verification must be completed by authorized staff.
+            </p>
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="mt-6 bg-red-50 border border-red-100 rounded-xl p-4 text-sm text-red-700">
+            <AlertIcon size={16} className="inline mr-1" />
+            {error}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
